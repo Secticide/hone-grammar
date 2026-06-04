@@ -1,0 +1,11 @@
+id = "hone"
+name = "Hone"
+description = "Hone programming language support"
+version = "0.0.1"
+schema_version = 1
+authors = ["Jak Boulton <jak.boulton@gmail.com>"]
+repository = "https://github.com/Secticide/hone"
+
+[grammars.hone]
+repository = "https://github.com/Secticide/tree-sitter-hone"
+commit = "5e114acb6dbabef11d12197403d6f268d8f7e477"

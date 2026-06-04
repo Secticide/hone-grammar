@@ -2,3 +2,6 @@ node_modules/
 build/
 bindings/
 package-lock.json
+
+# Zed clones the grammar here when installing the dev extension
+editors/zed/grammars/
