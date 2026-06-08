@@ -8,4 +8,4 @@ repository = "https://github.com/Secticide/hone"
 
 [grammars.hone]
 repository = "https://github.com/Secticide/tree-sitter-hone"
-commit = "5e114acb6dbabef11d12197403d6f268d8f7e477"
+commit = "53c0615af9615b62cb55846a20a0807e2b6462fc"
