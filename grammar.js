@@ -58,6 +58,7 @@ module.exports = grammar({
       $.extern_fn,
       $.struct_def,
       $.enum_def,
+      $.bitset_def,
       $.extern_union_def,
       $.impl_block,
       $.mod_block,
@@ -153,6 +154,8 @@ module.exports = grammar({
     enum_def: $ => seq(
       optional('pub'),
       'enum',
+      // Optional explicit backing type: `enum(u8) Name { ... }`
+      optional(seq('(', field('repr', $._type), ')')),
       field('name', $.identifier),
       optional(field('type_params', $.type_param_list)),
       '{',
@@ -162,7 +165,31 @@ module.exports = grammar({
 
     enum_variant: $ => seq(
       field('name', $.identifier),
-      optional(seq('{', repeat($.struct_field), '}')),
+      choice(
+        // Data variant: `Circle { radius: f32, ... }`
+        seq('{', repeat($.struct_field), '}'),
+        // Unit variant: `Red,` or `Red = 3,`
+        optional(seq('=', field('value', $.integer_literal))),
+      ),
+      ',',
+    ),
+
+    // ── Bitset ───────────────────────────────────────────────────────────
+
+    bitset_def: $ => seq(
+      optional('pub'),
+      'bitset',
+      // Optional explicit backing type: `bitset(u8) Name { ... }`
+      optional(seq('(', field('repr', $._type), ')')),
+      field('name', $.identifier),
+      '{',
+      repeat($.bitset_variant),
+      '}',
+    ),
+
+    bitset_variant: $ => seq(
+      field('name', $.identifier),
+      optional(seq('=', field('value', $.integer_literal))),
       ',',
     ),
 
@@ -231,7 +258,7 @@ module.exports = grammar({
       ':',
       field('type', $._type),
       '=',
-      field('value', $._expr),
+      field('value', $._rval),
       ';',
     ),
 
@@ -250,6 +277,8 @@ module.exports = grammar({
       $.primitive_type,
       $.self_type,
       $.void_type,
+      $.fn_ptr_type,
+      $.extern_fn_ptr_type,
       $.pointer_type,
       $.ref_type,
       $.array_type,
@@ -268,9 +297,37 @@ module.exports = grammar({
     self_type: $ => 'Self',
     void_type: $ => 'void',
 
+    // `fn(T1, T2) -> R` — native function pointer type
+    fn_ptr_type: $ => seq(
+      'fn',
+      '(',
+      optional(seq(
+        $._type,
+        repeat(seq(',', $._type)),
+        optional(','),
+      )),
+      ')',
+      optional(seq('->', $._type)),
+    ),
+
+    // `extern fn(T1, T2) -> R` — C-ABI function pointer type
+    extern_fn_ptr_type: $ => seq(
+      'extern',
+      'fn',
+      '(',
+      optional(seq(
+        $._type,
+        repeat(seq(',', $._type)),
+        optional(','),
+      )),
+      ')',
+      optional(seq('->', $._type)),
+    ),
+
     pointer_type: $ => prec(PREC.UNARY, seq('*', optional('mut'), $._type)),
     ref_type: $ => prec(PREC.UNARY, seq('&', optional('mut'), $._type)),
 
+    // `[N]T` or `[_]T` (inferred size uses identifier `_` in size position)
     array_type: $ => seq('[', field('size', $._expr), ']', field('element', $._type)),
     slice_type: $ => seq('[', ']', optional('mut'), field('element', $._type)),
 
@@ -295,7 +352,9 @@ module.exports = grammar({
       $.defer_stmt,
       $.fence_stmt,
       $.if_stmt,
+      $.if_let_stmt,
       $.while_stmt,
+      $.while_let_stmt,
       $.for_stmt,
       $.match_stmt,
       $.hash_if_stmt,
@@ -306,14 +365,14 @@ module.exports = grammar({
     let_stmt: $ => seq(
       'let',
       optional('mut'),
-      field('name', choice($.identifier, $.wildcard)),
+      field('name', $.identifier),
       optional(seq(':', field('type', $._type))),
-      optional(seq('=', field('value', $._expr))),
-      optional(seq('else', field('else_body', $.block))),
+      optional(seq('=', field('value', $._rval))),
+      optional(seq('else', field('else_body', choice($.block, $.unreachable_expr)))),
       ';',
     ),
 
-    return_stmt: $ => seq('return', optional($._expr), ';'),
+    return_stmt: $ => seq('return', optional($._rval), ';'),
     break_stmt:    $ => seq('break', ';'),
     continue_stmt: $ => seq('continue', ';'),
 
@@ -326,19 +385,50 @@ module.exports = grammar({
     defer_stmt: $ => seq('defer', $._stmt),
 
     if_stmt: $ => prec.right(seq(
+      optional(choice('#likely', '#unlikely')),
       'if',
-      optional(seq('let', field('pattern', $._pattern), '=')),
       field('cond', $._expr),
       field('then', $.block),
       optional(seq('else', field('else', choice($.if_stmt, $.block)))),
     )),
 
-    while_stmt: $ => seq('while', field('cond', $._expr), field('body', $.block)),
+    // `if let [mut] pattern = expr { then } [else { else }]`
+    // Covers both null-check (`if let [mut] name = ptr`) and variant forms.
+    if_let_stmt: $ => prec.right(seq(
+      optional(choice('#likely', '#unlikely')),
+      'if',
+      'let',
+      optional('mut'),
+      field('pattern', $._pattern),
+      '=',
+      field('cond', $._expr),
+      field('then', $.block),
+      optional(seq('else', field('else', choice($.if_let_stmt, $.if_stmt, $.block)))),
+    )),
+
+    while_stmt: $ => seq(
+      'while',
+      field('cond', $._expr),
+      field('body', $.block),
+    ),
+
+    // `while let [mut] pattern = expr { body }`
+    while_let_stmt: $ => seq(
+      'while',
+      'let',
+      optional('mut'),
+      field('pattern', $._pattern),
+      '=',
+      field('iter', $._expr),
+      field('body', $.block),
+    ),
 
     for_stmt: $ => seq(
       'for',
+      optional('mut'),
       field('var', $.identifier),
-      optional(seq(':', field('var_type', $._type))),
+      ':',
+      field('var_type', $._type),
       'in',
       field('iter', $._expr),
       field('body', $.block),
@@ -418,6 +508,10 @@ module.exports = grammar({
 
     // ── Expressions ──────────────────────────────────────────────────────
 
+    // `_expr` never includes struct_literal.  Struct literals are only
+    // valid in rvalue positions (see `_rval` below).  Keeping them out of
+    // `_expr` eliminates the `ident {` ambiguity in while/if/for/match
+    // conditions: the `{` can only start a block, never a struct body.
     _expr: $ => choice(
       $.assign_expr,
       $.binary_expr,
@@ -428,7 +522,6 @@ module.exports = grammar({
       $.index_expr,
       $.field_expr,
       $.range_expr,
-      $.struct_literal,
       $.array_expr,
       $.sizeof_expr,
       $.alignof_expr,
@@ -436,17 +529,23 @@ module.exports = grammar({
       $.unlikely_expr,
       $.path_expr,
       $.self_expr,
+      $.identifier,
       $.integer_literal,
       $.float_literal,
       $.bool_literal,
       $.null_literal,
       $.uninit_literal,
       $.string_literal,
+      $.raw_string_literal,
       $.cstring_literal,
       $.char_literal,
       $.paren_expr,
       $.unreachable_expr,
     ),
+
+    // `_rval` extends `_expr` with struct_literal for true rvalue positions:
+    // let initialisers, return values, function arguments, field values, etc.
+    _rval: $ => choice($._expr, $.struct_literal),
 
     assign_expr: $ => prec.right(PREC.ASSIGN, seq(
       $._expr,
@@ -454,7 +553,7 @@ module.exports = grammar({
         '=', '+=', '-=', '*=', '/=', '%=',
         '&=', '|=', '^=', '<<=', '>>=',
       ),
-      $._expr,
+      $._rval,
     )),
 
     binary_expr: $ => choice(
@@ -467,6 +566,8 @@ module.exports = grammar({
       prec.left(PREC.SHIFT,   seq($._expr, choice('<<', '>>'), $._expr)),
       prec.left(PREC.ADD,     seq($._expr, choice('+', '-'), $._expr)),
       prec.left(PREC.MUL,     seq($._expr, choice('*', '/', '%', '+%', '-%', '*%'), $._expr)),
+      // `in` operator: bitset membership check `needle in haystack`
+      prec.left(PREC.AND - 1, seq($._expr, 'in', $._expr)),
     ),
 
     unary_expr: $ => prec(PREC.UNARY, seq(
@@ -476,8 +577,26 @@ module.exports = grammar({
 
     cast_expr: $ => prec.left(PREC.CAST, seq($._expr, 'as', $._type)),
 
+    // callee_expr is a named (non-hidden) rule used only as call_expr.callee.
+    // Being named means LALR creates a REDUCE step for it. Combined with the
+    // elevated prec on $.identifier, this resolves the shift-reduce conflict:
+    // when lookahead is `(`, reducing `identifier → callee_expr` (prec CALL+1)
+    // beats shifting into struct_literal.type_arg_list (prec CALL).
+    // For lookahead `{`, FOLLOW(callee_expr)={`(`} so no reduce fires and
+    // struct_literal still parses normally.
+    callee_expr: $ => choice(
+      prec(PREC.CALL + 1, $.identifier),
+      prec(PREC.CALL + 1, $.path_expr),
+      $.paren_expr,
+      $.self_expr,
+      $.call_expr,
+      $.method_call_expr,
+      $.index_expr,
+      $.field_expr,
+    ),
+
     call_expr: $ => prec(PREC.CALL, seq(
-      field('callee', $._expr),
+      field('callee', $.callee_expr),
       field('args', $.arg_list),
     )),
 
@@ -491,8 +610,8 @@ module.exports = grammar({
     arg_list: $ => seq(
       '(',
       optional(seq(
-        $._expr,
-        repeat(seq(',', $._expr)),
+        $._rval,
+        repeat(seq(',', $._rval)),
         optional(','),
       )),
       ')',
@@ -539,14 +658,14 @@ module.exports = grammar({
     field_init: $ => seq(
       field('name', $.identifier),
       ':',
-      field('value', $._expr),
+      field('value', $._rval),
     ),
 
     array_expr: $ => seq(
       '[',
       choice(
-        seq($._expr, repeat(seq(',', $._expr)), optional(',')),
-        seq($._expr, ';', $._expr),  // repeat syntax [val; N]
+        seq($._rval, repeat(seq(',', $._rval)), optional(',')),
+        seq($._rval, ';', $._expr),  // repeat syntax [val; N]
       ),
       ']',
     ),
@@ -557,17 +676,16 @@ module.exports = grammar({
     likely_expr: $ => seq('#likely', '(', $._expr, ')'),
     unlikely_expr: $ => seq('#unlikely', '(', $._expr, ')'),
 
-    // Path: `Mod::item` or `Enum::Variant` or just `name`
+    // Path: `Mod::item` or `Enum::Variant`
     path_expr: $ => seq(
       field('qualifier', $.identifier),
       '::',
       field('name', $.identifier),
-      optional($.type_arg_list),
     ),
 
     self_expr: $ => 'self',
 
-    paren_expr: $ => seq('(', $._expr, ')'),
+    paren_expr: $ => seq('(', $._rval, ')'),
 
     // ── Literals ─────────────────────────────────────────────────────────
 
@@ -588,6 +706,14 @@ module.exports = grammar({
     string_literal: $ => token(seq(
       '"',
       repeat(choice(/[^"\\]/, seq('\\', /./  ))),
+      '"',
+    )),
+
+    // `r"..."` — raw string, no escape processing, type []char
+    raw_string_literal: $ => token(seq(
+      'r',
+      '"',
+      /[^"]*/,
       '"',
     )),
 

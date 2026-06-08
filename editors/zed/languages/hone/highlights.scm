@@ -15,6 +15,7 @@
   "impl"
   "struct"
   "enum"
+  "bitset"
   "union"
   "type"
   "if"
@@ -68,14 +69,15 @@
 
 ; ── Literals ──────────────────────────────────────────────────────────────────
 
-(integer_literal) @number
-(float_literal)   @number.float
-(bool_literal)    @boolean
-(null_literal)    @constant.builtin
-(uninit_literal)  @constant.builtin
-(string_literal)  @string
-(cstring_literal) @string
-(char_literal)    @character
+(integer_literal)    @number
+(float_literal)      @number.float
+(bool_literal)       @boolean
+(null_literal)       @constant.builtin
+(uninit_literal)     @constant.builtin
+(string_literal)     @string
+(raw_string_literal) @string
+(cstring_literal)    @string
+(char_literal)       @character
 
 ; ── Declarations ──────────────────────────────────────────────────────────────
 
@@ -83,6 +85,7 @@
 (extern_fn     name: (identifier) @function)
 (struct_def    name: (identifier) @type)
 (enum_def      name: (identifier) @type)
+(bitset_def    name: (identifier) @type)
 (extern_union_def name: (identifier) @type)
 (impl_block    name: (identifier) @type)
 (type_alias    name: (identifier) @type)
@@ -102,10 +105,11 @@
 ; Type parameters
 (type_param name: (identifier) @type)
 
-; ── Struct / enum members ─────────────────────────────────────────────────────
+; ── Struct / enum / bitset members ────────────────────────────────────────────
 
-(struct_field name: (identifier) @property)
-(enum_variant name: (identifier) @constant)
+(struct_field  name: (identifier) @property)
+(enum_variant  name: (identifier) @constant)
+(bitset_variant name: (identifier) @constant)
 
 ; ── Field access ──────────────────────────────────────────────────────────────
 
@@ -115,6 +119,7 @@
 
 ; ── Function calls ────────────────────────────────────────────────────────────
 
+(call_expr callee: (callee_expr (identifier) @function.call))
 (method_call_expr method: (identifier) @function.method.call)
 
 ; ── Paths ─────────────────────────────────────────────────────────────────────
