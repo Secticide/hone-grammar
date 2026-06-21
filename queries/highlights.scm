@@ -81,7 +81,7 @@
 (string_literal)     @string
 (raw_string_literal) @string
 (cstring_literal)    @string
-(char_literal)       @character
+(char_literal)       @string
 
 ; ── Declarations ──────────────────────────────────────────────────────────────
 
