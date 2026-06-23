@@ -31,6 +31,13 @@ module.exports = grammar({
   conflicts: $ => [
     // `expr.name(` is ambiguous: field_expr followed by call vs method_call_expr.
     [$.method_call_expr, $.field_expr],
+    // `Type(T)::Name` — `Type(T)` is parsed as call_expr but is also the qualifier
+    // for a generic-qualified path_expr or struct_literal.  GLR resolves via `::`.
+    [$.call_expr, $.path_expr],
+    [$.call_expr, $.struct_literal],
+    // `Name(T)` at `identifier •(`: callee_expr vs struct_literal name+type_args.
+    // GLR explores both; `{` body confirms struct_literal, otherwise call wins.
+    [$.callee_expr, $.struct_literal],
   ],
 
   rules: {
@@ -58,7 +65,6 @@ module.exports = grammar({
       $.extern_fn,
       $.struct_def,
       $.enum_def,
-
       $.extern_union_def,
       $.impl_block,
       $.mod_block,
@@ -72,7 +78,7 @@ module.exports = grammar({
     // ── Functions ────────────────────────────────────────────────────────
 
     function_def: $ => seq(
-      optional('pub'),
+      optional(choice('pub', 'intern')),
       optional(choice('#inline', '#noinline')),
       'fn',
       field('name', $.identifier),
@@ -118,7 +124,7 @@ module.exports = grammar({
     // ── Struct ───────────────────────────────────────────────────────────
 
     struct_def: $ => seq(
-      optional('pub'),
+      optional(choice('pub', 'intern')),
       'struct',
       field('name', $.identifier),
       optional(field('type_params', $.type_param_list)),
@@ -138,7 +144,7 @@ module.exports = grammar({
     type_param: $ => seq(
       field('name', $.identifier),
       ':',
-      'type',
+      $.meta_type,
     ),
 
     struct_field: $ => seq(
@@ -146,13 +152,13 @@ module.exports = grammar({
       field('name', $.identifier),
       ':',
       field('type', $._type),
-      ',',
+      optional(','),
     ),
 
     // ── Enum ─────────────────────────────────────────────────────────────
 
     enum_def: $ => seq(
-      optional('pub'),
+      optional(choice('pub', 'intern')),
       'enum',
       // Optional explicit backing type: `enum(u8) Name { ... }`
       optional(seq('(', field('repr', $._type), ')')),
@@ -166,18 +172,34 @@ module.exports = grammar({
     enum_variant: $ => seq(
       field('name', $.identifier),
       choice(
-        // Data variant: `Circle { radius: f32, ... }`
-        seq('{', repeat($.struct_field), '}'),
-        // Unit variant: `Red,` or `Red = 3,`
-        optional(seq('=', field('value', $.integer_literal))),
+        // Data variant: `Circle { radius: f32, center: Point }` — comma-separated,
+        // no trailing comma required (unlike struct definition fields).
+        seq(
+          '{',
+          optional(seq(
+            $.enum_data_field,
+            repeat(seq(',', $.enum_data_field)),
+            optional(','),
+          )),
+          '}',
+        ),
+        // Unit variant: `Red,` or `Red = 3,` or `Neg = -1,`
+        optional(seq('=', field('value', choice($.integer_literal, seq('-', $.integer_literal))))),
       ),
-      ',',
+      optional(','),
+    ),
+
+    // Fields inside an enum data variant — comma-separated, no trailing comma required.
+    enum_data_field: $ => seq(
+      field('name', $.identifier),
+      ':',
+      field('type', $._type),
     ),
 
     // ── Extern union ─────────────────────────────────────────────────────
 
     extern_union_def: $ => seq(
-      optional('pub'),
+      optional(choice('pub', 'intern')),
       'extern',
       'union',
       field('name', $.identifier),
@@ -188,10 +210,12 @@ module.exports = grammar({
 
     // ── Impl ─────────────────────────────────────────────────────────────
 
+    // `impl Name { ... }` or `impl Name(T) { ... }` (generic impl).
+    // The name is a plain identifier or a generic_type like `Pair(T)`.
     impl_block: $ => seq(
+      optional(choice('pub', 'intern')),
       'impl',
-      field('name', $.identifier),
-      optional(field('type_params', $.type_param_list)),
+      field('name', choice($.identifier, $.generic_type)),
       '{',
       repeat($.function_def),
       '}',
@@ -200,7 +224,7 @@ module.exports = grammar({
     // ── Modules ──────────────────────────────────────────────────────────
 
     mod_block: $ => seq(
-      optional('pub'),
+      optional(choice('pub', 'intern')),
       'mod',
       field('name', $.identifier),
       '{',
@@ -209,7 +233,7 @@ module.exports = grammar({
     ),
 
     mod_decl: $ => seq(
-      optional('pub'),
+      optional(choice('pub', 'intern')),
       'mod',
       field('name', $.identifier),
       ';',
@@ -222,7 +246,7 @@ module.exports = grammar({
     // ── Type alias ───────────────────────────────────────────────────────
 
     type_alias: $ => seq(
-      optional('pub'),
+      optional(choice('pub', 'intern')),
       'type',
       field('name', $.identifier),
       '=',
@@ -233,8 +257,9 @@ module.exports = grammar({
     // ── Global let ───────────────────────────────────────────────────────
 
     global_let: $ => seq(
-      optional('pub'),
+      optional(choice('pub', 'intern')),
       'let',
+      optional('mut'),
       field('name', $.identifier),
       ':',
       field('type', $._type),
@@ -258,12 +283,14 @@ module.exports = grammar({
       $.primitive_type,
       $.self_type,
       $.void_type,
+      $.meta_type,
       $.fn_ptr_type,
       $.extern_fn_ptr_type,
       $.pointer_type,
       $.ref_type,
       $.array_type,
       $.slice_type,
+      $.path_type,
       $.generic_type,
       $.named_type,
     ),
@@ -277,6 +304,9 @@ module.exports = grammar({
 
     self_type: $ => 'Self',
     void_type: $ => 'void',
+
+    // The `type` keyword used as a type in generic parameters: `T: type`.
+    meta_type: $ => 'type',
 
     // `fn(T1, T2) -> R` — native function pointer type
     fn_ptr_type: $ => seq(
@@ -313,7 +343,7 @@ module.exports = grammar({
     slice_type: $ => seq('[', ']', optional('mut'), field('element', $._type)),
 
     generic_type: $ => prec(1, seq(
-      field('name', $.identifier),
+      field('name', choice($.identifier, $.path_type)),
       '(',
       $._type,
       repeat(seq(',', $._type)),
@@ -322,6 +352,14 @@ module.exports = grammar({
     )),
 
     named_type: $ => $.identifier,
+
+    // `module::Type` or `a::b::c::Type` — module-qualified type name.
+    // Left-recursive: qualifier can itself be a path_type for 3+ levels.
+    path_type: $ => prec.left(1, seq(
+      field('qualifier', choice($.identifier, $.path_type)),
+      '::',
+      field('name', $.identifier),
+    )),
 
     // ── Statements ───────────────────────────────────────────────────────
 
@@ -338,6 +376,9 @@ module.exports = grammar({
       $.while_let_stmt,
       $.for_stmt,
       $.match_stmt,
+      $.cond_match_stmt,
+      $.print_stmt,
+      $.keep_stmt,
       $.hash_if_stmt,
       $.block,
       $.expr_stmt,
@@ -349,8 +390,11 @@ module.exports = grammar({
       field('name', $.identifier),
       optional(seq(':', field('type', $._type))),
       optional(seq('=', field('value', $._rval))),
-      optional(seq('else', field('else_body', choice($.block, $.unreachable_expr)))),
-      ';',
+      choice(
+        // let-else: the else block diverges, so no trailing ';' is required.
+        seq('else', field('else_body', choice($.block, $.unreachable_expr)), optional(';')),
+        ';',
+      ),
     ),
 
     return_stmt: $ => seq('return', optional($._rval), ';'),
@@ -429,6 +473,35 @@ module.exports = grammar({
       field('body', $.block),
     ),
 
+    // `match { cond => { } ... }` — condition match without a scrutinee.
+    // Each arm condition is a boolean expression; `_` is the wildcard fallthrough.
+    cond_match_stmt: $ => seq(
+      'match',
+      '{',
+      repeat($.cond_match_arm),
+      '}',
+    ),
+
+    cond_match_arm: $ => seq(
+      field('cond', $._expr),
+      '=>',
+      field('body', $.block),
+    ),
+
+    // `#print("fmt", args...)` and friends — formatted output builtins.
+    print_stmt: $ => seq(
+      choice('#print', '#println', '#eprint', '#eprintln'),
+      '(',
+      field('format', $.string_literal),
+      repeat(seq(',', $._rval)),
+      optional(','),
+      ')',
+      ';',
+    ),
+
+    // `#keep(expr)` — prevent the optimiser from eliminating a variable.
+    keep_stmt: $ => seq('#keep', '(', $._expr, ')', ';'),
+
     hash_if_stmt: $ => prec.right(seq(
       '#if',
       field('cond', $._expr),
@@ -457,8 +530,9 @@ module.exports = grammar({
       repeat1(seq('|', $._pattern)),
     )),
 
+    // `Variant { field }` or `Enum::Variant { field }` or `pkg::Enum::Variant { field }`
     struct_pattern: $ => seq(
-      optional(seq(field('enum_name', $.identifier), '::')),
+      optional(seq(field('enum_name', choice($.identifier, $.generic_type, $.path_type)), '::')),
       field('variant', $.identifier),
       '{',
       optional(seq(
@@ -482,14 +556,15 @@ module.exports = grammar({
       $.string_literal,
     ),
 
+    // `Name`, `Qualifier::Name`, `Qualifier(T)::Name`, or `pkg::Enum::Variant`
     path_pattern: $ => seq(
-      optional(seq(field('qualifier', $.identifier), '::')),
+      optional(seq(field('qualifier', choice($.identifier, $.generic_type, $.path_type)), '::')),
       field('name', $.identifier),
     ),
 
     // ── Expressions ──────────────────────────────────────────────────────
 
-    // `_expr` never includes struct_literal.  Struct literals are only
+    // `_expr` never includes struct_literal or slice_literal.  Those are only
     // valid in rvalue positions (see `_rval` below).  Keeping them out of
     // `_expr` eliminates the `ident {` ambiguity in while/if/for/match
     // conditions: the `{` can only start a block, never a struct body.
@@ -520,13 +595,14 @@ module.exports = grammar({
       $.raw_string_literal,
       $.cstring_literal,
       $.char_literal,
+      $.primitive_type,
       $.paren_expr,
       $.unreachable_expr,
     ),
 
-    // `_rval` extends `_expr` with struct_literal for true rvalue positions:
-    // let initialisers, return values, function arguments, field values, etc.
-    _rval: $ => choice($._expr, $.struct_literal),
+    // `_rval` extends `_expr` with struct_literal and slice_literal for true
+    // rvalue positions: let initialisers, return values, function arguments, etc.
+    _rval: $ => choice($._expr, $.struct_literal, $.slice_literal),
 
     assign_expr: $ => prec.right(PREC.ASSIGN, seq(
       $._expr,
@@ -557,15 +633,14 @@ module.exports = grammar({
 
     cast_expr: $ => prec.left(PREC.CAST, seq($._expr, 'as', $._type)),
 
-    // callee_expr is a named (non-hidden) rule used only as call_expr.callee.
-    // Being named means LALR creates a REDUCE step for it. Combined with the
-    // elevated prec on $.identifier, this resolves the shift-reduce conflict:
-    // when lookahead is `(`, reducing `identifier → callee_expr` (prec CALL+1)
-    // beats shifting into struct_literal.type_arg_list (prec CALL).
-    // For lookahead `{`, FOLLOW(callee_expr)={`(`} so no reduce fires and
-    // struct_literal still parses normally.
+    // callee_expr is the named rule used as call_expr.callee.
+    // - identifier at prec CALL (= struct_literal prec) so `identifier •(` is a
+    //   real GLR conflict resolved by [callee_expr, struct_literal]: `{` body
+    //   confirms struct_literal, otherwise callee_expr/call_expr wins.
+    // - path_expr at prec CALL+1 (> struct_literal prec) so `path_expr •(` always
+    //   reduces to callee_expr deterministically (no struct_literal ambiguity there).
     callee_expr: $ => choice(
-      prec(PREC.CALL + 1, $.identifier),
+      prec(PREC.CALL, $.identifier),
       prec(PREC.CALL + 1, $.path_expr),
       $.paren_expr,
       $.self_expr,
@@ -590,11 +665,23 @@ module.exports = grammar({
     arg_list: $ => seq(
       '(',
       optional(seq(
-        $._rval,
-        repeat(seq(',', $._rval)),
+        $._call_arg,
+        repeat(seq(',', $._call_arg)),
         optional(','),
       )),
       ')',
+    ),
+
+    // Arguments to a function call: either a value (rval) or a pure-type form
+    // that cannot appear as an rval.  primitive_type and named_type are already
+    // in _expr so they are covered by _rval.  slice_type (`[]T`) is the common
+    // case; fn_ptr_type handles generic callbacks.  array_type (`[N]T`) is
+    // excluded because `[expr]` is ambiguous with array_expr.
+    _call_arg: $ => choice(
+      $._rval,
+      $.slice_type,
+      $.fn_ptr_type,
+      $.extern_fn_ptr_type,
     ),
 
     index_expr: $ => prec(PREC.CALL, seq(
@@ -610,23 +697,59 @@ module.exports = grammar({
       field('field', $.identifier),
     )),
 
-    range_expr: $ => prec.left(PREC.ADD - 1, seq($._expr, '..', $._expr)),
-
-    // Struct literal: `Foo { field: val, ... }` or `Enum::Variant { field: val }`
-    struct_literal: $ => prec(PREC.CALL, seq(
-      optional(seq(field('qualifier', $.identifier), '::')),
-      field('name', $.identifier),
-      optional($.type_arg_list),
-      '{',
-      optional(seq(
-        $.field_init,
-        repeat(seq(',', $.field_init)),
-        optional(','),
-      )),
-      '}',
+    // Covers `start..end`, `start..` (open end), and `..end` (open start).
+    // The open-end forms are used in slice-range indexing: `arr[2..]`, `arr[..3]`.
+    range_expr: $ => prec.left(PREC.ADD - 1, choice(
+      seq($._expr, '..', $._expr),
+      seq($._expr, '..'),
+      seq('..', $._expr),
     )),
 
-    // Type arguments in a struct literal: `Vec(i32) { ... }`
+    // Struct literal — two distinct forms to avoid GLR backtracking issues:
+    //
+    //   Form A — `Name(T) { ... }` (generic name, no qualifier):
+    //     type_arg_list is REQUIRED so the GLR branch commits to it early and
+    //     fails at `{` if the input isn't actually a struct literal; this
+    //     prevents the branch from consuming `(args)` after `qualifier::name`.
+    //
+    //   Form B — `[Qualifier::]Name { ... }` (optional qualifier, no type args):
+    //     Handles plain struct literals and generic-qualified literals like
+    //     `Option(i32)::Variant { ... }` where the qualifier is a call_expr.
+    //
+    // The [callee_expr, struct_literal] GLR conflict fires at `identifier •(`
+    // and explores both callee_expr (call) and Form A (generic struct) paths.
+    // Form B has no type_arg_list so it fails immediately at `(` after
+    // `qualifier::name`, leaving the callee_expr → call_expr path clean.
+    struct_literal: $ => prec(PREC.CALL, choice(
+      // Form A: Name(TypeArgs) { fields } — generic struct, no qualifier
+      seq(
+        field('name', $.identifier),
+        field('type_args', $.type_arg_list),
+        '{',
+        optional(seq(
+          $.field_init,
+          repeat(seq(',', $.field_init)),
+          optional(','),
+        )),
+        '}',
+      ),
+      // Form B: [Qualifier::]Name { fields } — plain or qualified struct.
+      // qualifier accepts path_expr to handle module-qualified enum variants:
+      // `ast::Type::FnPtr { ... }` where `ast::Type` is the qualifier.
+      seq(
+        optional(seq(field('qualifier', choice($.identifier, $.call_expr, $.path_expr)), '::')),
+        field('name', $.identifier),
+        '{',
+        optional(seq(
+          $.field_init,
+          repeat(seq(',', $.field_init)),
+          optional(','),
+        )),
+        '}',
+      ),
+    )),
+
+    // Type arguments in a generic struct literal: `Vec(i32) { ... }`
     type_arg_list: $ => seq(
       '(',
       $._type,
@@ -639,6 +762,18 @@ module.exports = grammar({
       field('name', $.identifier),
       ':',
       field('value', $._rval),
+    ),
+
+    // `[]T { ptr: expr, len: expr }` or `[]mut T { ... }` — explicit slice construction.
+    slice_literal: $ => seq(
+      field('slice_type', $.slice_type),
+      '{',
+      optional(seq(
+        $.field_init,
+        repeat(seq(',', $.field_init)),
+        optional(','),
+      )),
+      '}',
     ),
 
     array_expr: $ => seq(
@@ -656,12 +791,13 @@ module.exports = grammar({
     likely_expr: $ => seq('#likely', '(', $._expr, ')'),
     unlikely_expr: $ => seq('#unlikely', '(', $._expr, ')'),
 
-    // Path: `Mod::item` or `Enum::Variant`
-    path_expr: $ => seq(
-      field('qualifier', $.identifier),
+    // Path: `Mod::item`, `Enum::Variant`, `pkg::mod::item` (3+ levels), or
+    // `Enum(T)::Variant` (generic qualifier — `Enum(T)` is a call_expr).
+    path_expr: $ => prec.left(seq(
+      field('qualifier', choice($.identifier, $.call_expr, $.path_expr)),
       '::',
       field('name', $.identifier),
-    ),
+    )),
 
     self_expr: $ => 'self',
 

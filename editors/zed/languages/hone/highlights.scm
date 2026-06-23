@@ -10,6 +10,7 @@
   "let"
   "mut"
   "pub"
+  "intern"
   "mod"
   "use"
   "impl"
@@ -38,6 +39,7 @@
 "self"             @variable.special
 (self_type)        @type.builtin
 (void_type)        @type.builtin
+(meta_type)        @type.builtin
 (unreachable_expr) @keyword.control
 
 ; ── Compiler builtins ─────────────────────────────────────────────────────────
@@ -56,6 +58,17 @@
 ] @function.builtin
 
 (fence_stmt "#fence" @function.builtin)
+
+[
+  "#print"
+  "#println"
+  "#eprint"
+  "#eprintln"
+] @function.builtin
+
+(print_stmt format: (string_literal) @string)
+
+(keep_stmt "#keep" @function.builtin)
 
 ; ── Primitive types ───────────────────────────────────────────────────────────
 
@@ -91,6 +104,7 @@
 (enum_def      name: (identifier) @type)
 (extern_union_def name: (identifier) @type)
 (impl_block    name: (identifier) @type)
+(impl_block    name: (generic_type name: (identifier) @type))
 (type_alias    name: (identifier) @type)
 
 ; Module names
@@ -126,19 +140,54 @@
 
 ; ── Paths ─────────────────────────────────────────────────────────────────────
 
-; `Mod::item` — qualifier is a namespace, name is the called entity
-(path_expr   qualifier: (identifier) @namespace)
-(path_expr   name: (identifier) @function.call)
+; `Mod::item` — plain qualifier
+(path_expr qualifier: (identifier) @namespace)
+(path_expr name: (identifier) @function.call)
 
-; Enum variant construction in struct literal
+; `Enum(T)::item` — generic qualifier (call_expr)
+(path_expr qualifier: (generic_type name: (identifier) @type))
+
+; `pkg::mod::item` — nested path qualifier
+(path_expr qualifier: (path_expr name: (identifier) @namespace))
+
+; ── Type paths ────────────────────────────────────────────────────────────────
+
+; `module::Type` — path_type qualifier and name
+(path_type qualifier: (identifier) @namespace)
+(path_type qualifier: (path_type name: (identifier) @namespace))
+(path_type name: (identifier) @type)
+
+; `module::Generic(T)` — generic_type with path_type name
+(generic_type name: (path_type name: (identifier) @type))
+(generic_type name: (path_type qualifier: (identifier) @namespace))
+
+; ── Struct literal construction ───────────────────────────────────────────────
+
+; Enum variant construction in struct literal — plain qualifier
 (struct_literal qualifier: (identifier) @type)
 (struct_literal name: (identifier) @constant)
 
-; Patterns
+; Enum variant construction — generic qualifier (call_expr)
+(struct_literal qualifier: (generic_type name: (identifier) @type))
+
+; Enum variant construction — deep path qualifier: `pkg::Enum::Variant { }`
+(struct_literal qualifier: (path_expr name: (identifier) @type))
+
+; ── Patterns ──────────────────────────────────────────────────────────────────
+
+; Patterns — plain qualifier
 (path_pattern   qualifier: (identifier) @type)
 (path_pattern   name: (identifier) @constant)
 (struct_pattern enum_name: (identifier) @type)
 (struct_pattern variant: (identifier) @constant)
+
+; Patterns — generic qualifier
+(path_pattern   qualifier: (generic_type name: (identifier) @type))
+(struct_pattern enum_name: (generic_type name: (identifier) @type))
+
+; Patterns — deep path qualifier: `pkg::Enum::Variant`
+(path_pattern   qualifier: (path_type name: (identifier) @type))
+(struct_pattern enum_name: (path_type name: (identifier) @type))
 
 ; ── Operators ─────────────────────────────────────────────────────────────────
 
