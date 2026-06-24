@@ -53,6 +53,8 @@
 [
   "#sizeof"
   "#alignof"
+  "#sqrt"
+  "#abs"
   "#likely"
   "#unlikely"
 ] @function.builtin

@@ -582,6 +582,8 @@ module.exports = grammar({
       $.array_expr,
       $.sizeof_expr,
       $.alignof_expr,
+      $.sqrt_expr,
+      $.abs_expr,
       $.likely_expr,
       $.unlikely_expr,
       $.path_expr,
@@ -788,6 +790,8 @@ module.exports = grammar({
 
     sizeof_expr: $ => seq('#sizeof', '(', $._type, ')'),
     alignof_expr: $ => seq('#alignof', '(', $._type, ')'),
+    sqrt_expr: $ => seq('#sqrt', '(', $._expr, ')'),
+    abs_expr: $ => seq('#abs', '(', $._expr, ')'),
 
     likely_expr: $ => seq('#likely', '(', $._expr, ')'),
     unlikely_expr: $ => seq('#unlikely', '(', $._expr, ')'),
