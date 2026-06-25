@@ -55,6 +55,9 @@
   "#alignof"
   "#sqrt"
   "#abs"
+  "#floor"
+  "#ceil"
+  "#round"
   "#likely"
   "#unlikely"
 ] @function.builtin

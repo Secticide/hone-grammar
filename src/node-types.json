@@ -40,6 +40,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -53,6 +57,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -97,6 +105,10 @@
         },
         {
           "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
           "named": true
         },
         {
@@ -238,6 +250,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -255,6 +271,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -303,6 +323,10 @@
         },
         {
           "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
           "named": true
         },
         {
@@ -393,6 +417,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -406,6 +434,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -450,6 +482,10 @@
         },
         {
           "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
           "named": true
         },
         {
@@ -594,6 +630,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -607,6 +647,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -651,6 +695,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -730,6 +778,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -743,6 +795,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -787,6 +843,10 @@
         },
         {
           "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
           "named": true
         },
         {
@@ -873,6 +933,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -886,6 +950,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -930,6 +998,10 @@
         },
         {
           "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
           "named": true
         },
         {
@@ -1174,6 +1246,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -1191,6 +1267,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -1266,6 +1346,10 @@
           "named": true
         },
         {
+          "type": "round_expr",
+          "named": true
+        },
+        {
           "type": "self_expr",
           "named": true
         },
@@ -1307,6 +1391,153 @@
         },
         {
           "type": "void_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "ceil_expr",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "abs_expr",
+          "named": true
+        },
+        {
+          "type": "alignof_expr",
+          "named": true
+        },
+        {
+          "type": "array_expr",
+          "named": true
+        },
+        {
+          "type": "assign_expr",
+          "named": true
+        },
+        {
+          "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "bool_literal",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
+          "type": "char_literal",
+          "named": true
+        },
+        {
+          "type": "cstring_literal",
+          "named": true
+        },
+        {
+          "type": "field_expr",
+          "named": true
+        },
+        {
+          "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "index_expr",
+          "named": true
+        },
+        {
+          "type": "integer_literal",
+          "named": true
+        },
+        {
+          "type": "likely_expr",
+          "named": true
+        },
+        {
+          "type": "method_call_expr",
+          "named": true
+        },
+        {
+          "type": "null_literal",
+          "named": true
+        },
+        {
+          "type": "paren_expr",
+          "named": true
+        },
+        {
+          "type": "path_expr",
+          "named": true
+        },
+        {
+          "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "range_expr",
+          "named": true
+        },
+        {
+          "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
+          "named": true
+        },
+        {
+          "type": "self_expr",
+          "named": true
+        },
+        {
+          "type": "sizeof_expr",
+          "named": true
+        },
+        {
+          "type": "sqrt_expr",
+          "named": true
+        },
+        {
+          "type": "string_literal",
+          "named": true
+        },
+        {
+          "type": "unary_expr",
+          "named": true
+        },
+        {
+          "type": "uninit_literal",
+          "named": true
+        },
+        {
+          "type": "unlikely_expr",
+          "named": true
+        },
+        {
+          "type": "unreachable_expr",
           "named": true
         }
       ]
@@ -1363,6 +1594,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -1376,6 +1611,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -1420,6 +1659,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -1810,6 +2053,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -1823,6 +2070,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -1867,6 +2118,10 @@
         },
         {
           "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
           "named": true
         },
         {
@@ -2134,6 +2389,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -2147,6 +2406,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -2191,6 +2454,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -2290,6 +2557,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -2303,6 +2574,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -2347,6 +2622,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -2417,6 +2696,153 @@
           }
         ]
       }
+    }
+  },
+  {
+    "type": "floor_expr",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "abs_expr",
+          "named": true
+        },
+        {
+          "type": "alignof_expr",
+          "named": true
+        },
+        {
+          "type": "array_expr",
+          "named": true
+        },
+        {
+          "type": "assign_expr",
+          "named": true
+        },
+        {
+          "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "bool_literal",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
+          "type": "char_literal",
+          "named": true
+        },
+        {
+          "type": "cstring_literal",
+          "named": true
+        },
+        {
+          "type": "field_expr",
+          "named": true
+        },
+        {
+          "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "index_expr",
+          "named": true
+        },
+        {
+          "type": "integer_literal",
+          "named": true
+        },
+        {
+          "type": "likely_expr",
+          "named": true
+        },
+        {
+          "type": "method_call_expr",
+          "named": true
+        },
+        {
+          "type": "null_literal",
+          "named": true
+        },
+        {
+          "type": "paren_expr",
+          "named": true
+        },
+        {
+          "type": "path_expr",
+          "named": true
+        },
+        {
+          "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "range_expr",
+          "named": true
+        },
+        {
+          "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
+          "named": true
+        },
+        {
+          "type": "self_expr",
+          "named": true
+        },
+        {
+          "type": "sizeof_expr",
+          "named": true
+        },
+        {
+          "type": "sqrt_expr",
+          "named": true
+        },
+        {
+          "type": "string_literal",
+          "named": true
+        },
+        {
+          "type": "unary_expr",
+          "named": true
+        },
+        {
+          "type": "uninit_literal",
+          "named": true
+        },
+        {
+          "type": "unlikely_expr",
+          "named": true
+        },
+        {
+          "type": "unreachable_expr",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -2533,6 +2959,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -2546,6 +2976,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -2590,6 +3024,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -2977,6 +3415,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -2990,6 +3432,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -3034,6 +3480,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -3121,6 +3571,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -3134,6 +3588,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -3178,6 +3636,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -3311,6 +3773,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -3324,6 +3790,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -3368,6 +3838,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -3471,6 +3945,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -3484,6 +3962,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -3528,6 +4010,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -3661,6 +4147,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -3674,6 +4164,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -3718,6 +4212,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -3851,6 +4349,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -3864,6 +4366,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -3908,6 +4414,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -3981,6 +4491,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -3994,6 +4508,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -4038,6 +4556,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -4117,6 +4639,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -4130,6 +4656,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -4174,6 +4704,10 @@
         },
         {
           "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
           "named": true
         },
         {
@@ -4334,6 +4868,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -4347,6 +4885,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -4391,6 +4933,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -4478,6 +5024,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -4491,6 +5041,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -4535,6 +5089,10 @@
         },
         {
           "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
           "named": true
         },
         {
@@ -4686,6 +5244,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -4699,6 +5261,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -4743,6 +5309,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -4857,6 +5427,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -4870,6 +5444,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -4914,6 +5492,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -5222,6 +5804,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -5235,6 +5821,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -5279,6 +5869,10 @@
         },
         {
           "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
           "named": true
         },
         {
@@ -5557,6 +6151,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -5570,6 +6168,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -5614,6 +6216,10 @@
         },
         {
           "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
           "named": true
         },
         {
@@ -5700,6 +6306,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -5713,6 +6323,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -5757,6 +6371,10 @@
         },
         {
           "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
           "named": true
         },
         {
@@ -5898,6 +6516,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -5911,6 +6533,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -5958,6 +6584,10 @@
           "named": true
         },
         {
+          "type": "round_expr",
+          "named": true
+        },
+        {
           "type": "self_expr",
           "named": true
         },
@@ -5979,6 +6609,153 @@
         },
         {
           "type": "struct_literal",
+          "named": true
+        },
+        {
+          "type": "unary_expr",
+          "named": true
+        },
+        {
+          "type": "uninit_literal",
+          "named": true
+        },
+        {
+          "type": "unlikely_expr",
+          "named": true
+        },
+        {
+          "type": "unreachable_expr",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "round_expr",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "abs_expr",
+          "named": true
+        },
+        {
+          "type": "alignof_expr",
+          "named": true
+        },
+        {
+          "type": "array_expr",
+          "named": true
+        },
+        {
+          "type": "assign_expr",
+          "named": true
+        },
+        {
+          "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "bool_literal",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
+          "type": "char_literal",
+          "named": true
+        },
+        {
+          "type": "cstring_literal",
+          "named": true
+        },
+        {
+          "type": "field_expr",
+          "named": true
+        },
+        {
+          "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "index_expr",
+          "named": true
+        },
+        {
+          "type": "integer_literal",
+          "named": true
+        },
+        {
+          "type": "likely_expr",
+          "named": true
+        },
+        {
+          "type": "method_call_expr",
+          "named": true
+        },
+        {
+          "type": "null_literal",
+          "named": true
+        },
+        {
+          "type": "paren_expr",
+          "named": true
+        },
+        {
+          "type": "path_expr",
+          "named": true
+        },
+        {
+          "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "range_expr",
+          "named": true
+        },
+        {
+          "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
+          "named": true
+        },
+        {
+          "type": "self_expr",
+          "named": true
+        },
+        {
+          "type": "sizeof_expr",
+          "named": true
+        },
+        {
+          "type": "sqrt_expr",
+          "named": true
+        },
+        {
+          "type": "string_literal",
           "named": true
         },
         {
@@ -6264,6 +7041,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -6277,6 +7058,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -6321,6 +7106,10 @@
         },
         {
           "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
           "named": true
         },
         {
@@ -6785,6 +7574,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -6798,6 +7591,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -6842,6 +7639,10 @@
         },
         {
           "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
           "named": true
         },
         {
@@ -6920,6 +7721,10 @@
           "named": true
         },
         {
+          "type": "ceil_expr",
+          "named": true
+        },
+        {
           "type": "char_literal",
           "named": true
         },
@@ -6933,6 +7738,10 @@
         },
         {
           "type": "float_literal",
+          "named": true
+        },
+        {
+          "type": "floor_expr",
           "named": true
         },
         {
@@ -6977,6 +7786,10 @@
         },
         {
           "type": "raw_string_literal",
+          "named": true
+        },
+        {
+          "type": "round_expr",
           "named": true
         },
         {
@@ -7080,6 +7893,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -7093,6 +7910,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -7137,6 +7958,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -7252,6 +8077,10 @@
             "named": true
           },
           {
+            "type": "ceil_expr",
+            "named": true
+          },
+          {
             "type": "char_literal",
             "named": true
           },
@@ -7265,6 +8094,10 @@
           },
           {
             "type": "float_literal",
+            "named": true
+          },
+          {
+            "type": "floor_expr",
             "named": true
           },
           {
@@ -7309,6 +8142,10 @@
           },
           {
             "type": "raw_string_literal",
+            "named": true
+          },
+          {
+            "type": "round_expr",
             "named": true
           },
           {
@@ -7360,6 +8197,10 @@
     "named": false
   },
   {
+    "type": "#ceil",
+    "named": false
+  },
+  {
     "type": "#eprint",
     "named": false
   },
@@ -7369,6 +8210,10 @@
   },
   {
     "type": "#fence",
+    "named": false
+  },
+  {
+    "type": "#floor",
     "named": false
   },
   {
@@ -7397,6 +8242,10 @@
   },
   {
     "type": "#println",
+    "named": false
+  },
+  {
+    "type": "#round",
     "named": false
   },
   {
