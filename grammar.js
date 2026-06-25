@@ -38,6 +38,10 @@ module.exports = grammar({
     // `Name(T)` at `identifier •(`: callee_expr vs struct_literal name+type_args.
     // GLR explores both; `{` body confirms struct_literal, otherwise call wins.
     [$.callee_expr, $.struct_literal],
+    // `fn(...) •  token` — optional return type: token may start a type (shift) or
+    // be part of the enclosing expression (reduce).  GLR resolves by context.
+    [$.fn_ptr_type],
+    [$.extern_fn_ptr_type],
   ],
 
   rules: {
@@ -83,7 +87,7 @@ module.exports = grammar({
       'fn',
       field('name', $.identifier),
       field('params', $.param_list),
-      optional(seq('->', field('return_type', $._type))),
+      optional(field('return_type', $._type)),
       field('body', $.block),
     ),
 
@@ -93,7 +97,7 @@ module.exports = grammar({
       'fn',
       field('name', $.identifier),
       field('params', $.param_list),
-      optional(seq('->', field('return_type', $._type))),
+      optional(field('return_type', $._type)),
       ';',
     ),
 
@@ -242,7 +246,7 @@ module.exports = grammar({
 
     // ── Use ──────────────────────────────────────────────────────────────
 
-    use_decl: $ => seq('use', $.path, ';'),
+    use_decl: $ => seq(optional(choice('pub', 'intern')), 'use', $.path, ';'),
 
     // ── Type alias ───────────────────────────────────────────────────────
 
@@ -309,7 +313,7 @@ module.exports = grammar({
     // The `type` keyword used as a type in generic parameters: `T: type`.
     meta_type: $ => 'type',
 
-    // `fn(T1, T2) -> R` — native function pointer type
+    // `fn(T1, T2) R` — native function pointer type
     fn_ptr_type: $ => seq(
       'fn',
       '(',
@@ -319,10 +323,10 @@ module.exports = grammar({
         optional(','),
       )),
       ')',
-      optional(seq('->', $._type)),
+      optional($._type),
     ),
 
-    // `extern fn(T1, T2) -> R` — C-ABI function pointer type
+    // `extern fn(T1, T2) R` — C-ABI function pointer type
     extern_fn_ptr_type: $ => seq(
       'extern',
       'fn',
@@ -333,7 +337,7 @@ module.exports = grammar({
         optional(','),
       )),
       ')',
-      optional(seq('->', $._type)),
+      optional($._type),
     ),
 
     pointer_type: $ => prec(PREC.UNARY, seq('*', optional('mut'), $._type)),
@@ -822,9 +826,10 @@ module.exports = grammar({
       /0[bB][01][01_]*/,
     )),
 
-    float_literal: $ => token(
-      /[0-9][0-9_]*\.[0-9][0-9_]*/,
-    ),
+    float_literal: $ => token(choice(
+      /[0-9][0-9_]*\.[0-9][0-9_]*([eE][+-]?[0-9][0-9_]*)?/,
+      /[0-9][0-9_]*[eE][+-]?[0-9][0-9_]*/,
+    )),
 
     bool_literal: $ => choice('true', 'false'),
     null_literal: $ => 'null',

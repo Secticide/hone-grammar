@@ -149,8 +149,8 @@
 (path_expr qualifier: (identifier) @namespace)
 (path_expr name: (identifier) @function.call)
 
-; `Enum(T)::item` — generic qualifier (call_expr)
-(path_expr qualifier: (generic_type name: (identifier) @type))
+; `Enum(T)::item` — generic qualifier parsed as call_expr; the identifier inside
+; is highlighted as @function.call by the call_expr rule above.
 
 ; `pkg::mod::item` — nested path qualifier
 (path_expr qualifier: (path_expr name: (identifier) @namespace))
@@ -171,9 +171,6 @@
 ; Enum variant construction in struct literal — plain qualifier
 (struct_literal qualifier: (identifier) @type)
 (struct_literal name: (identifier) @constant)
-
-; Enum variant construction — generic qualifier (call_expr)
-(struct_literal qualifier: (generic_type name: (identifier) @type))
 
 ; Enum variant construction — deep path qualifier: `pkg::Enum::Variant { }`
 (struct_literal qualifier: (path_expr name: (identifier) @type))
@@ -205,7 +202,7 @@
   "+" "-" "*" "/" "%" "+%" "-%" "*%"
   "==" "!=" "<" "<=" ">" ">="
   "&" "|" "^" "~" "<<" ">>"
-  "->" "=>"
+  "=>"
   "::"
 ] @operator
 
