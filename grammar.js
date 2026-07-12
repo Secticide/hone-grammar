@@ -638,13 +638,32 @@ module.exports = grammar({
 
     // `Quat { ... }.normalise()` — a method call whose receiver is a struct literal.
     //
-    // Deliberately confined to `_rval` rather than added to method_call_expr's receiver.
-    // A struct literal is only ever *written* in an rvalue position, and `_rval` is not
-    // reachable from a condition — so `if v < lo { v = lo; }` cannot see this rule and
-    // the `ident {` ambiguity never arises. Admitting struct literals anywhere reachable
-    // from `_expr` instead makes the condition's `{` ambiguous with a struct body, and
-    // because `_expr` is a hidden rule that inlines into every expression position, the
-    // conflict leaks grammar-wide.
+    // PARTIAL, and the shortfall is real: honec puts no restriction on a struct literal,
+    // so `V { x: 1 }.sum() + 10` and the chained `V { .. }.a().b()` are both valid Hone.
+    // This rule only covers a literal whose method call is the *whole* rvalue — a `let`
+    // initialiser, a `return`, a call argument. The other two forms still land in ERROR.
+    //
+    // The rule sits in `_rval` because that is not reachable from a condition, so
+    // `if v < lo { v = lo; }` never sees it and the `ident {` ambiguity cannot arise.
+    // Covering the general case means admitting struct_literal into `_expr`, and every
+    // route to that has failed the corpus:
+    //
+    //   * struct_literal straight into method_call_expr's receiver, or via a named
+    //     receiver_expr mirroring callee_expr — both force a conflict against `_expr`.
+    //   * a full `_cexpr` parallel hierarchy (struct-literal-free mirror of the spine,
+    //     used by the six block-taking rules) — the honest fix, and what tree-sitter-rust
+    //     does. It generates, but LALR merges the condition states into the general ones,
+    //     so a bare identifier can reduce to `_cexpr` or `_expr` and tree-sitter demands a
+    //     conflict between them.
+    //
+    // Any conflict naming `_expr`/`_rval` corrupts the tables, because tree-sitter inlines
+    // hidden rules into every expression position. It does not fail loudly — it generates
+    // and then misparses, taking ~60 of the 61 corpus files with it. Always check the
+    // corpus, never trust a clean `generate`.
+    //
+    // Untried: a context-sensitive `{` as an external token, with the scanner consulting
+    // valid_symbols to tell a struct body from a block. That is the standard escape hatch
+    // for ambiguities LALR cannot carry, and src/scanner.c already exists.
     struct_method_call: $ => prec(PREC.CALL, seq(
       field('receiver', $.struct_literal),
       '.',
