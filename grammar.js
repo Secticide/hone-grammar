@@ -1,9 +1,10 @@
 // Tree-sitter grammar for the Hone programming language.
 // Targets Zed editor via the tree-sitter query files in queries/.
 //
-// Nested block comments (/* /* */ */) are a Hone feature that tree-sitter
-// cannot express with a pure regex token. The regex here handles the common
-// case; a future external scanner can fix it if it becomes a problem.
+// Hone's block comments nest (`/* outer /* inner */ still outer */`). Nesting is
+// not a regular language — no regex token can count depth — so block_comment is an
+// external token scanned by src/scanner.c, which keeps a counter the way honec's
+// lexer does.
 
 const PREC = {
   ASSIGN:  1,
@@ -24,6 +25,9 @@ module.exports = grammar({
   name: 'hone',
 
   extras: $ => [/\s/, $.line_comment, $.block_comment],
+
+  // Scanned by src/scanner.c — see the header note on nesting.
+  externals: $ => [$.block_comment],
 
   word: $ => $.identifier,
 
@@ -54,11 +58,7 @@ module.exports = grammar({
 
     line_comment: $ => token(seq('//', /.*/)),
 
-    block_comment: $ => token(seq(
-      '/*',
-      /[^*]*\*+([^/*][^*]*\*+)*/,
-      '/',
-    )),
+    // block_comment is external — declared in `externals`, scanned in src/scanner.c.
 
     // ── Identifiers ──────────────────────────────────────────────────────
 
