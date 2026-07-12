@@ -362,6 +362,10 @@
           "named": true
         },
         {
+          "type": "struct_method_call",
+          "named": true
+        },
+        {
           "type": "unary_expr",
           "named": true
         },
@@ -514,6 +518,10 @@
         },
         {
           "type": "struct_literal",
+          "named": true
+        },
+        {
+          "type": "struct_method_call",
           "named": true
         },
         {
@@ -878,6 +886,10 @@
           "named": true
         },
         {
+          "type": "struct_method_call",
+          "named": true
+        },
+        {
           "type": "unary_expr",
           "named": true
         },
@@ -1033,6 +1045,10 @@
           "named": true
         },
         {
+          "type": "struct_method_call",
+          "named": true
+        },
+        {
           "type": "unary_expr",
           "named": true
         },
@@ -1185,6 +1201,10 @@
         },
         {
           "type": "struct_literal",
+          "named": true
+        },
+        {
+          "type": "struct_method_call",
           "named": true
         },
         {
@@ -2036,6 +2056,10 @@
           },
           {
             "type": "struct_literal",
+            "named": true
+          },
+          {
+            "type": "struct_method_call",
             "named": true
           },
           {
@@ -3152,6 +3176,10 @@
             "named": true
           },
           {
+            "type": "struct_method_call",
+            "named": true
+          },
+          {
             "type": "unary_expr",
             "named": true
           },
@@ -4007,6 +4035,10 @@
           },
           {
             "type": "struct_literal",
+            "named": true
+          },
+          {
+            "type": "struct_method_call",
             "named": true
           },
           {
@@ -5016,6 +5048,10 @@
             "named": true
           },
           {
+            "type": "struct_method_call",
+            "named": true
+          },
+          {
             "type": "unary_expr",
             "named": true
           },
@@ -5688,6 +5724,10 @@
           },
           {
             "type": "struct_literal",
+            "named": true
+          },
+          {
+            "type": "struct_method_call",
             "named": true
           },
           {
@@ -6480,6 +6520,10 @@
           "named": true
         },
         {
+          "type": "struct_method_call",
+          "named": true
+        },
+        {
           "type": "unary_expr",
           "named": true
         },
@@ -6824,6 +6868,10 @@
         },
         {
           "type": "struct_literal",
+          "named": true
+        },
+        {
+          "type": "struct_method_call",
           "named": true
         },
         {
@@ -7189,6 +7237,10 @@
         },
         {
           "type": "struct_literal",
+          "named": true
+        },
+        {
+          "type": "struct_method_call",
           "named": true
         },
         {
@@ -7885,6 +7937,42 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "struct_method_call",
+    "named": true,
+    "fields": {
+      "args": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "arg_list",
+            "named": true
+          }
+        ]
+      },
+      "method": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "receiver": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "struct_literal",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {

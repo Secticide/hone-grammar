@@ -634,7 +634,23 @@ module.exports = grammar({
 
     // `_rval` extends `_expr` with struct_literal and slice_literal for true
     // rvalue positions: let initialisers, return values, function arguments, etc.
-    _rval: $ => choice($._expr, $.struct_literal, $.slice_literal),
+    _rval: $ => choice($._expr, $.struct_literal, $.slice_literal, $.struct_method_call),
+
+    // `Quat { ... }.normalise()` — a method call whose receiver is a struct literal.
+    //
+    // Deliberately confined to `_rval` rather than added to method_call_expr's receiver.
+    // A struct literal is only ever *written* in an rvalue position, and `_rval` is not
+    // reachable from a condition — so `if v < lo { v = lo; }` cannot see this rule and
+    // the `ident {` ambiguity never arises. Admitting struct literals anywhere reachable
+    // from `_expr` instead makes the condition's `{` ambiguous with a struct body, and
+    // because `_expr` is a hidden rule that inlines into every expression position, the
+    // conflict leaks grammar-wide.
+    struct_method_call: $ => prec(PREC.CALL, seq(
+      field('receiver', $.struct_literal),
+      '.',
+      field('method', $.identifier),
+      field('args', $.arg_list),
+    )),
 
     assign_expr: $ => prec.right(PREC.ASSIGN, seq(
       $._expr,

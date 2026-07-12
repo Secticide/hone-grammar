@@ -3278,8 +3278,49 @@
         {
           "type": "SYMBOL",
           "name": "slice_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "struct_method_call"
         }
       ]
+    },
+    "struct_method_call": {
+      "type": "PREC",
+      "value": 13,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "FIELD",
+            "name": "receiver",
+            "content": {
+              "type": "SYMBOL",
+              "name": "struct_literal"
+            }
+          },
+          {
+            "type": "STRING",
+            "value": "."
+          },
+          {
+            "type": "FIELD",
+            "name": "method",
+            "content": {
+              "type": "SYMBOL",
+              "name": "identifier"
+            }
+          },
+          {
+            "type": "FIELD",
+            "name": "args",
+            "content": {
+              "type": "SYMBOL",
+              "name": "arg_list"
+            }
+          }
+        ]
+      }
     },
     "assign_expr": {
       "type": "PREC_RIGHT",
