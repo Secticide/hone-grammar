@@ -27,7 +27,6 @@
   "break"
   "continue"
   "defer"
-  "as"
   "and"
   "or"
   "not"
@@ -52,6 +51,10 @@
 ] @keyword.directive
 
 [
+  "#cast"
+  "#truncate"
+  "#bitcast"
+  "#ptrcast"
   "#sizeof"
   "#alignof"
   "#sqrt"
@@ -223,6 +226,7 @@
   "&" "|" "^" "~" "<<" ">>"
   "=>"
   "::"
+  ".*"
 ] @operator
 
 [ "." ".." ] @punctuation.delimiter

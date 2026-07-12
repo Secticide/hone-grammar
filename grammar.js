@@ -17,7 +17,6 @@ const PREC = {
   ADD:     9,
   MUL:    10,
   UNARY:  11,
-  CAST:   12,
   CALL:   13,
 };
 
@@ -157,7 +156,7 @@ module.exports = grammar({
     ),
 
     struct_field: $ => seq(
-      optional('pub'),
+      optional(choice('pub', 'intern')),
       field('name', $.identifier),
       ':',
       field('type', $._type),
@@ -472,12 +471,18 @@ module.exports = grammar({
 
     for_stmt: $ => seq(
       'for',
-      optional('mut'),
-      field('var', $.identifier),
-      ':',
-      field('var_type', $._type),
-      'in',
-      field('iter', $._expr),
+      choice(
+        seq(
+          optional('mut'),
+          field('var', $.identifier),
+          ':',
+          field('var_type', $._type),
+          'in',
+          field('iter', $._expr),
+        ),
+        // Counted form — `for 0..10 { }` runs the body (end - start) times, no variable.
+        field('iter', $._expr),
+      ),
       field('body', $.block),
     ),
 
@@ -594,11 +599,12 @@ module.exports = grammar({
       $.assign_expr,
       $.binary_expr,
       $.unary_expr,
-      $.cast_expr,
+      $.conversion_expr,
       $.call_expr,
       $.method_call_expr,
       $.index_expr,
       $.field_expr,
+      $.deref_expr,
       $.range_expr,
       $.array_expr,
       $.sizeof_expr,
@@ -652,12 +658,24 @@ module.exports = grammar({
 
     ),
 
+    // Prefix `*` is pointer-type syntax only — never an operator. Dereference is
+    // postfix `.*` (see deref_expr), which is what keeps `f(*p, x)` unambiguous
+    // against a leading type argument.
     unary_expr: $ => prec(PREC.UNARY, seq(
-      choice('not', '-', '~', '*', '&', seq('&', 'mut')),
+      choice('not', '-', '~', '&', seq('&', 'mut')),
       $._expr,
     )),
 
-    cast_expr: $ => prec.left(PREC.CAST, seq($._expr, 'as', $._type)),
+    // There is no cast operator. Every explicit conversion is an intrinsic taking
+    // the destination type first.
+    conversion_expr: $ => seq(
+      choice('#cast', '#truncate', '#bitcast', '#ptrcast'),
+      '(',
+      field('type', $._type),
+      ',',
+      field('value', $._rval),
+      ')',
+    ),
 
     // callee_expr is the named rule used as call_expr.callee.
     // - identifier at prec CALL (= struct_literal prec) so `identifier •(` is a
@@ -681,6 +699,11 @@ module.exports = grammar({
       field('args', $.arg_list),
     )),
 
+    // KNOWN GAP: the receiver cannot be a struct literal, so `Quat { ... }.normalise()`
+    // (std/src/maths) does not parse. Adding struct_literal here reintroduces the
+    // `ident {` ambiguity — `if v < lo { v = lo; }` then reads `lo { ... }` as a struct
+    // literal receiver — so closing it needs an external scanner or a no-struct-literal
+    // context flag, not a one-line rule change.
     method_call_expr: $ => prec(PREC.CALL, seq(
       field('receiver', $._expr),
       '.',
@@ -721,6 +744,12 @@ module.exports = grammar({
       field('base', $._expr),
       '.',
       field('field', $.identifier),
+    )),
+
+    // `p.*` — dereference. Postfix, so it binds like `.field` and `[i]`.
+    deref_expr: $ => prec(PREC.CALL, seq(
+      field('base', $._expr),
+      '.*',
     )),
 
     // Covers `start..end`, `start..` (open end), and `..end` (open start).
